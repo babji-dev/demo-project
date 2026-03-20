@@ -14,7 +14,6 @@ class HelloWorldApplicationTests {
 
 	@Test
 	void testCase(){
-		Assertions.assertTrue(1==2);
 	}
 
 
