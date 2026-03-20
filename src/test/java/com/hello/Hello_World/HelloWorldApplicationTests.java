@@ -10,4 +10,10 @@ class HelloWorldApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void testCase(){
+		Assertions.assertTrue(1==2);
+	}
+
+
 }
