@@ -1,35 +1,69 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java CI with Maven
 
 on:
   push:
-    branches: [ "master" ]
-  # pull_request:
-  #   branches: [ "master" ]
+    branches:
+      - "master"
+      - "guardian/**"
+  pull_request:
+    branches:
+      - "master"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual trigger"
+        required: false
+        default: "Pipeline Guardian auto-fix"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    # - name: Update dependency graph
-    #   uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B clean compile --file pom.xml
+
+      - name: Run tests
+        run: mvn -B test --file pom.xml
+
+      - name: Package
+        run: mvn -B package -DskipTests --file pom.xml
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: app-jar
+          path: target/*.jar
+          retention-days: 7
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: build
+    if: failure()
+
+    steps:
+      - name: Log failure details for Pipeline Guardian
+        run: |
+          echo "========================================"
+          echo "Build failed — Pipeline Guardian notified"
+          echo "========================================"
+          echo "Repository : ${{ github.repository }}"
+          echo "Branch     : ${{ github.ref_name }}"
+          echo "Commit SHA : ${{ github.sha }}"
+          echo "Run ID     : ${{ github.run_id }}"
+          echo "Run URL    : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "========================================"
+          echo "Pipeline Guardian webhook fires automatically"
+          echo "via GitHub repo webhook settings."
