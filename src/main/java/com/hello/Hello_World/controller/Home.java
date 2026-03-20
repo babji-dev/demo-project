@@ -11,7 +11,7 @@ public class Home {
         return "I'm Working!!";
     }
 
-    @GetMaping("/test2")
+    @GetMappng("/test2")
     public String hello2(){
         return "I'm Working!!";
     }
