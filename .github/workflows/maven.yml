@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - "master"
-      - "guardian/**"
-  pull_request:
-    branches:
-      - "master"
+      # - "guardian/**"
+  # pull_request:
+  #   branches:
+  #     - "master"
   workflow_dispatch:
     inputs:
       reason:
