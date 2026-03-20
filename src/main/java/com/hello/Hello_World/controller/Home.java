@@ -13,6 +13,6 @@ public class Home {
 
     @GetMapping("/test2")
     public String hello2(){
-        return "I'm Working!!";    }
+        return "I'm Working!!";  
 
 }
