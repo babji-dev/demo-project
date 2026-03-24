@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class Home {
-;
     @GetMapping()
     public String hello(){
+        ;
         return "I'm Working!!";
     }
     @GetMapping("/test2")
