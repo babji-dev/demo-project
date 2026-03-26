@@ -8,6 +8,7 @@ public class Home {
     @GetMapping()
     public String hello(){
         return "I'm Working!!";
+        1
     }
     @GetMapping("/test2")
     public String hello2(){
