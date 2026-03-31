@@ -8,11 +8,9 @@ public class Home {
     @GetMapping()
     public String hello(){
         return "I'm Working!!";
-        1
     }
     @GetMapping("/test2")
-    public String hello2(){
-        return "I'm Working!!";  
+    public String hello2(){        return "I'm Working!!";  
     }
 
 }
