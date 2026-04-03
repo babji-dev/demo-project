@@ -1,0 +1,61 @@
+# .github/workflows/test-infra-failure.yml
+name: Test Infra Failure
+
+on:
+  workflow_dispatch:
+    inputs:
+      failure_type:
+        description: "Type of failure to simulate"
+        required: true
+        default: "network"
+        type: choice
+        options:
+          - network
+          - cache
+          - flaky
+          - oom
+          - runner
+
+jobs:
+  simulate-failure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate ${{ github.event.inputs.failure_type }} failure
+        run: |
+          TYPE="${{ github.event.inputs.failure_type }}"
+
+          if [ "$TYPE" = "network" ]; then
+            echo "Downloading dependency from internal registry..."
+            echo "curl: (6) Could not resolve host: artifacts.internal.company.com"
+            echo "ERROR: Failed to download artifact after 3 retries"
+            echo "Connection reset by peer"
+            exit 1
+
+          elif [ "$TYPE" = "cache" ]; then
+            echo "[ERROR] Could not resolve dependencies for project"
+            echo "Could not find artifact com.example:shared-lib:jar:2.1.0"
+            echo "Failed to execute goal: dependency:resolve"
+            echo "Artifact download failed — cache may be corrupted"
+            exit 1
+
+          elif [ "$TYPE" = "flaky" ]; then
+            echo "Running integration tests..."
+            echo "FAILED tests/service/PaymentServiceTest::testProcessPayment"
+            echo "java.net.SocketTimeoutException: Read timed out after 30000ms"
+            echo "    at com.hello.service.PaymentServiceTest.testProcessPayment(PaymentServiceTest.java:89)"
+            echo "Tests run: 12, Failures: 1, Errors: 0, Skipped: 0"
+            echo "BUILD FAILURE"
+            exit 1
+
+          elif [ "$TYPE" = "oom" ]; then
+            echo "Exception in thread \"main\" java.lang.OutOfMemoryError: GC overhead limit exceeded"
+            echo "    at java.util.HashMap.resize(HashMap.java:704)"
+            echo "There is insufficient memory for the Java Runtime Environment"
+            exit 1
+
+          elif [ "$TYPE" = "runner" ]; then
+            echo "Error: Unable to locate executable file: mvn"
+            echo "/usr/bin/env: 'mvn': No such file or directory"
+            echo "Process completed with exit code 127."
+            exit 127
+          fi
